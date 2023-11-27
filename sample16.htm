@@ -10,66 +10,52 @@
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.min.js"></script>
   </head>
   <script>
-    AFRAME.registerComponent("ammo-restitution", {
-      schema: { default: 0.9 },
-      init() {
-        const el = this.el;
-        const restitution = this.data; //引数
-        el.addEventListener("body-loaded", function () {
-          el.body.setRestitution(restitution);
-        });
-      }
-    });
-
     AFRAME.registerComponent("input-listen", {
       init: function () {
-        //Called when trigger of ctrlL is pressed
+        //左のコントローラーでトリガーボタンが押されたときに実行
         this.el.addEventListener("triggerdown", function (e) {
           let txt = document.getElementById("txt");
-          //txt.setAttribute("value", "triggerdown");
 
-          //Aqurire all ball entities which are instantiated in a-scene
+
+          //シーン内でインスタンス化されるすべてのボールの要素を取得
           var els = document.querySelectorAll(".ball");
 
-          //Destroy all ball entities
+          //ボールの要素を削除
           for (var i = 0; i < els.length; i++) {
             els[i].parentNode.removeChild(els[i]);
           }
 
-          //"this" reffers ctlL in this function
+          //"this" はctlLを示す。this.object3Dで位置を取得して、THREEVector3に挿入
           var point = new THREE.Vector3();
           this.object3D.getWorldPosition(point);
 
-          //Creating ball entity.
-          var ball = document.createElement("a-sphere");
+          //ボールを作成
+          var ball = document.createElement("a-sphere");//物理演算の設定
           ball.setAttribute(
             "ammo-body",
-            "type: dynamic; mass:4; gravity: 0 -4 0"
+            "type: dynamic; mass:4; gravity: 0 -4 0"//弾薬形状、タイプ、球体の設定
           );
           ball.setAttribute("ammo-shape", "type: sphere");
-          //ball.setAttribute("ammo-restitution", "0.9");　効かない
-          ball.setAttribute("class", "ball");
+          ball.setAttribute("class", "ball");//球のプロパティ
           ball.setAttribute("radius", "0.2");
           ball.setAttribute("scale", "1 1 1");
           ball.setAttribute("position", point);
           ball.setAttribute("color", "#FF0000");
 
-          //Getting raycaster which was attached to ctrlL
+          //derectionでレイキャスターの方向制御
           var dir = this.getAttribute("raycaster").direction;
 
-          //Setting shoot dierction and speed
+          //シュートの方向とスピードを設定する
           var force = new THREE.Vector3(dir.x, dir.y, dir.z);
           force.multiplyScalar(100);
           ball.force = this.object3D.localToWorld(force);
 
-          //Instantiate ball entity in a-scene
+          //シーン内のボールエンティティをインスタンス化する
           var scene = document.querySelector("a-scene");
           scene.appendChild(ball);
 
-          //shoot "ball" after physics information getting ready.
+          //ボール発射
           ball.addEventListener("body-loaded", function (e) {
-            //"this" reffers ball entity in this function
-            //txt.setAttribute("value", "body-loaded");
 
             this.body.setRestitution(0.9); //必要！
 
@@ -89,6 +75,7 @@
 
   <body>
     <a-scene physics="driver: ammo; debug: false;  ">
+        <!-- 床 -->
       <a-box
         ammo-body="type: static"
         ammo-shape="type: box"
@@ -102,6 +89,8 @@
         src="back.png"
       >
       </a-box>
+
+      <!-- 天井 -->
       <a-box
         ammo-body="type: static"
         ammo-shape="type: box"
@@ -115,6 +104,8 @@
         src="back.png"
       >
       </a-box>
+      
+      <!-- 正面の壁 -->
       <a-box
         ammo-body="type: static"
         ammo-shape="type: box"
@@ -128,6 +119,8 @@
         src="back.png"
       >
       </a-box>
+
+      <!-- 背後の壁 -->
       <a-box
         ammo-body="type: static"
         ammo-shape="type: box"
@@ -141,6 +134,8 @@
         src="back.png"
       >
       </a-box>
+
+      <!-- 右の壁 -->
       <a-box
         ammo-body="type: static"
         ammo-shape="type: box"
@@ -154,6 +149,8 @@
         src="back.png"
       >
       </a-box>
+      
+      <!-- 左の壁 -->
       <a-box
         ammo-body="type: static"
         ammo-shape="type: box"
@@ -169,6 +166,8 @@
       </a-box>
 
       <a-entity id="cameraRig">
+
+        <!-- ユーザーの視点 -->
         <a-entity
           id="head"
           camera
@@ -178,18 +177,24 @@
         >
         </a-entity>
 
+        <!-- 左コントローラー -->
         <a-entity
           id="ctlL"
           raycaster="objects: .collidable; far:4;"
           oculus-touch-controls="hand: left"
           input-listen
         >
-          <a-sphere
+
+        <!-- 白い点
+        <a-sphere
             radius="0.01"
             position="0 0 -1.2"
             color="#FFFFFF"
           ></a-sphere>
-          <a-text
+         -->
+          
+          <!-- テキスト 
+        <a-text
             id="txt"
             value="Press ctrlL trigger!"
             position="0 0 -1.3"
@@ -197,14 +202,17 @@
             align="center"
             color="#0000FF"
           ></a-text>
+        -->
         </a-entity>
 
+        <!-- 右コントローラー -->
         <a-entity
           id="ctlR"
           raycaster="objects: .collidable; far:4;"
           oculus-touch-controls="hand: right"
         >
-          <a-box
+        <!-- ラケットの持ち手 
+        <a-box
             class="collidable"
             ammo-body="type: static"
             ammo-shape="type: box"
@@ -217,7 +225,11 @@
             color="#2b3a3d"
             shadow
           ></a-box>
-          <a-cylinder
+        -->
+          
+
+          <!--ラケット表面
+        <a-cylinder
             class="collidable"
             ammo-body="type: static"
             ammo-shape="type: cylinder"
@@ -230,6 +242,8 @@
             rotation="20 0 90"
             shadow
           ></a-cylinder>
+        -->
+          
         </a-entity>
       </a-entity>
     </a-scene>
